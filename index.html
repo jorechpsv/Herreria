@@ -1,0 +1,38 @@
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - Cotizador de Herrería</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 40px; color: #333; }
+        h1 { text-align: center; color: #002fa7; margin-bottom: 10px; font-size: 28px; }
+        p.subtitle { text-align: center; color: #666; margin-bottom: 40px; }
+        .grid-disenos { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; max-width: 1200px; margin: 0 auto; }
+        .tarjeta { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); padding: 25px; display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; border-top: 5px solid #ccc; }
+        .tarjeta:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+        .t-laberinto { border-top-color: #002fa7; }
+        .t-persiana { border-top-color: #2e7d32; }
+        .t-diagonal { border-top-color: #ff9800; }
+        .tarjeta h3 { margin: 0 0 10px 0; font-size: 20px; color: #222; }
+        .tarjeta p { color: #666; font-size: 14px; line-height: 1.5; flex-grow: 1; margin-bottom: 20px; }
+        .btn-entrar { background: #1a1a1a; color: white; text-decoration: none; padding: 12px; text-align: center; border-radius: 6px; font-weight: bold; font-size: 14px; transition: background 0.2s; }
+        .btn-entrar:hover { background: #333; }
+    </style>
+</head>
+<body>
+    <h1>🛠️ Sistema de Cotización - Librería Santo Domingo</h1>
+    <p class="subtitle">Selecciona el modelo de portón solicitado para calcular la guía de cortes LEGO y barras comerciales.</p>
+    <div class="grid-disenos">
+        <div class="tarjeta t-laberinto">
+            <h3>📐 Laberinto Concéntrico</h3>
+            <p>Estructura moderna basada en cuadrantes simétricos con optimización LEGO y listado de cortes secuenciales para el obrero.</p>
+            <a href="./generador-laberinto/index.html" class="btn-entrar">Abrir Calculador</a>
+        </div>
+        <div class="tarjeta t-persiana">
+            <h3>斜 Tipo Persiana / Zetas</h3>
+            <p>Diseño de privacidad con tubos angulados o láminas troqueladas. Calcula los grados de inclinación y cortes diagonales.</p>
+            <a href="#" class="btn-entrar" style="background: #ccc; cursor: not-allowed;">Próximamente</a>
+        </div>
+    </div>
+</body>
+</html>
