@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculador Puerta Estructural - Modelo 01</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            display: flex; 
+            padding: 20px; 
+            background: #f0f2f5; 
+            margin: 0; 
+            min-height: 100vh; 
+            box-sizing: border-box; 
+        }
+        
+        .col-controles { 
+            width: 340px; 
+            min-width: 340px;
+            padding: 20px; 
+            background: white; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            margin-right: 20px; 
+            box-sizing: border-box; 
+        }
+        .col-visor { 
+            flex-grow: 1; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            margin-right: 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            box-sizing: border-box; 
+        }
+        .col-reporte { 
+            width: 440px; 
+            min-width: 440px;
+            padding: 20px; 
+            background: white; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            box-sizing: border-box; 
+        }
+
+        .control-group { margin-bottom: 12px; }
+        label { display: block; font-weight: bold; margin-bottom: 4px; color: #444; font-size: 13px; }
+        input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+        
+        .btn-pdf { width: 100%; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-pdf:hover { background: #1b5e20; }
+        
+        .compra-box { padding: 12px; background: #fff8e1; border-left: 4px solid #ffb300; border-radius: 4px; color: #5d4037; font-size: 13.5px; margin-bottom: 15px; }
+        .compra-box h4 { margin: 0 0 8px 0; font-size: 15px; color: #5d4037; border-bottom: 1px solid #ffe082; padding-bottom: 4px; }
+        
+        svg { border: 1px solid #ccc; background: #fff; max-height: 80vh; max-width: 100%; border-radius: 4px; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-bottom: 15px; }
+        th, td { border: 1px solid #e0e0e0; padding: 7px; text-align: left; }
+        th { background-color: #2b2b2b; color: white; }
+        .subtitulo-tabla { background-color: #f1f3f5; font-weight: bold; color: #495057; font-size: 11.5px; }
+
+        @media (max-width: 950px) {
+            body { flex-direction: column; padding: 10px; }
+            .col-controles, .col-visor, .col-reporte { width: 100% !important; min-width: 100% !important; margin-right: 0 !important; margin-bottom: 15px; }
+            svg { max-height: 60vh; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="col-controles">
+    <h2 style="margin-top:0; color:#111;">Puertas - Modelo 01</h2>
+    <p style="font-size:12px; color:#666; margin-top:-10px;">Ángulo Encajuelado + Hierro Cuadrado 1/2"</p>
+    <button class="btn-pdf" onclick="window.print()">🖨️ Imprimir Guía de Cortes</button>
+    
+    <div class="control-group">
+        <label>Ancho Total Puerta (cm):</label>
+        <input type="number" id="ancho" value="95" oninput="calcularPuerta()">
+    </div>
+    <div class="control-group">
+        <label>Alto Total Puerta (cm):</label>
+        <input type="number" id="alto" value="210" oninput="calcularPuerta()">
+    </div>
+    <div class="control-group">
+        <label>Alto Zócalo / Lámina Base (cm):</label>
+        <input type="number" id="zocalo" value="40" oninput="calcularPuerta()">
+    </div>
+    <div class="control-group">
+        <label>Ancho Cuadros Centrales (cm):</label>
+        <input type="number" id="anchoCuadro" value="25" oninput="calcularPuerta()">
+    </div>
+    <div class="control-group">
+        <label>Alto Cuadros Centrales (cm):</label>
+        <input type="number" id="altoCuadro" value="25" oninput="calcularPuerta()">
+    </div>
+</div>
+
+<div class="col-visor">
+    <svg id="lienzo" viewBox="0 0 95 210"></svg>
+</div>
+
+<div class="col-reporte">
+    <div class="compra-box">
+        <h4>📋 Estimación de Barras (6 metros)</h4>
+        <div id="detalleCompra">Calculando...</div>
+    </div>
+    <h3 style="margin-top:0;">✂️ Orden de Corte</h3>
+    <table id="tablaCortes">
+        <thead>
+            <tr><th>Material</th><th>Ubicación / Pieza</th><th>Medida</th><th>Cant</th></tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+function calcularPuerta() {
+    const ancho = parseFloat(document.getElementById('ancho').value) || 90;
+    const alto = parseFloat(document.getElementById('alto').value) || 200;
+    const zocalo = parseFloat(document.getElementById('zocalo').value) || 40;
+    const wCuadro = parseFloat(document.getElementById('anchoCuadro').value) || 25;
+    const hCuadro = parseFloat(document.getElementById('altoCuadro').value) || 25;
+    
+    // Espesores exactos basados en tus materiales
+    const platina = 2.54;       // 1 pulgada alrededor
+    const encajuelado = 3.81;   // Supone ángulo de 1.5" para formar el tubo del marco
+    const hCuadrado = 1.27;     // Hierro cuadrado de 1/2"
+    
+    const lienzo = document.getElementById('lienzo');
+    lienzo.setAttribute('viewBox', `0 0 ${ancho} ${alto}`);
+    lienzo.innerHTML = '';
+    
+    // 1. Dibujar Platina Exterior de 1"
+    const rPlatina = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rPlatina.setAttribute("x", platina/2); rPlatina.setAttribute("y", platina/2);
+    rPlatina.setAttribute("width", ancho - platina); rPlatina.setAttribute("height", alto - platina);
+    rPlatina.setAttribute("fill", "none"); rPlatina.setAttribute("stroke", "#78909c"); rPlatina.setAttribute("stroke-width", platina);
+    lienzo.appendChild(rPlatina);
+    
+    // Área útil donde va la puerta de ángulo encajuelado
+    const xPuerta = platina;
+    const wPuerta = ancho - (platina * 2);
+    const hPuerta = alto - (platina * 2);
+    
+    // 2. Dibujar Marco de Ángulo Encajuelado
+    const rMarco = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rMarco.setAttribute("x", xPuerta + encajuelado/2); rMarco.setAttribute("y", xPuerta + encajuelado/2);
+    rMarco.setAttribute("width", wPuerta - encajuelado); rMarco.setAttribute("height", hPuerta - encajuelado);
+    rMarco.setAttribute("fill", "none"); rMarco.setAttribute("stroke", "#1a1a1a"); rMarco.setAttribute("stroke-width", encajuelado);
+    lienzo.appendChild(rMarco);
+    
+    // 3. Zócalo de Lámina abajo
+    const yZocalo = alto - platina - zocalo;
+    const rZocalo = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rZocalo.setAttribute("x", xPuerta + encajuelado); rZocalo.setAttribute("y", yZocalo);
+    rZocalo.setAttribute("width", wPuerta - (encajuelado * 2)); rZocalo.setAttribute("height", zocalo - encajuelado);
+    rZocalo.setAttribute("fill", "#b0bec5"); rZocalo.setAttribute("opacity", "0.5");
+    lienzo.appendChild(rZocalo);
+    
+    // División superior del zócalo (Tubo encajuelado horizontal)
+    const lZocalo = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    lZocalo.setAttribute("x", xPuerta + encajuelado); lZocalo.setAttribute("y", yZocalo - encajuelado/2);
+    lZocalo.setAttribute("width", wPuerta - (encajuelado * 2)); lZocalo.setAttribute("height", encajuelado);
+    lZocalo.setAttribute("fill", "#1a1a1a");
+    lienzo.appendChild(lZocalo);
+    
+    // Área útil para figuras geométricas (Arriba del zócalo)
+    const yUtilMin = platina + encajuelado;
+    const yUtilMax = yZocalo - encajuelado/2;
+    const hUtil = yUtilMax - yUtilMin;
+    const xUtilMin = xPuerta + encajuelado;
+    const wUtil = wPuerta - (encajuelado * 2);
+    
+    // 4. Poste Central Vertical de Ángulo Encajuelado
+    const xCentro = xUtilMin + (wUtil / 2);
+    const lCentro = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    lCentro.setAttribute("x", xCentro - encajuelado/2); lCentro.setAttribute("y", yUtilMin);
+    lCentro.setAttribute("width", encajuelado); lCentro.setAttribute("height", hUtil);
+    lCentro.setAttribute("fill", "#1a1a1a");
+    lienzo.appendChild(lCentro);
+    
+    // Postes Laterales Intermedios (Pasadores verticales largos)
+    const distLateral = wUtil / 4;
+    const xPosteIzq = xUtilMin + distLateral;
+    const xPosteDer = xUtilMin + (distLateral * 3);
+    
+    [xPosteIzq, xPosteDer].forEach(xP => {
+        const lp = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        lp.setAttribute("x", xP - encajuelado/2); lp.setAttribute("y", yUtilMin);
+        lp.setAttribute("width", encajuelado); lp.setAttribute("height", hUtil);
+        lp.setAttribute("fill", "#1a1a1a");
+        lienzo.appendChild(lp);
+    });
+    
+    // 5. Dibujar los 3 Módulos de Hierro Cuadrado en el eje central
+    const espacioEntreCuadros = hUtil / 3;
+    let totalCmsCuadrado = 0;
+    let cantBrazosCortos = 0;
+    
+    for (let i = 0; i < 3; i++) {
+        const yCentroCuadro = yUtilMin + (espacioEntreCuadros * i) + (espacioEntreCuadros / 2);
+        const yTopCuadro = yCentroCuadro - (hCuadro / 2);
+        
+        // El cuadro de 1/2"
+        const cuad = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        cuad.setAttribute("x", xCentro - (wCuadro / 2)); cuad.setAttribute("y", yTopCuadro);
+        cuad.setAttribute("width", wCuadro); cuad.setAttribute("height", hCuadro);
+        cuad.setAttribute("fill", "none"); cuad.setAttribute("stroke", "#d32f2f"); cuad.setAttribute("stroke-width", hCuadrado);
+        lienzo.appendChild(cuad);
+        totalCmsCuadrado += (wCuadro * 2) + (hCuadro * 2);
+        
+        // Brazos horizontales de acople desde el cuadro central hacia los postes laterales
+        const yBrazo1 = yTopCuadro + (hCuadro * 0.2);
+        const yBrazo2 = yTopCuadro + (hCuadro * 0.8);
+        
+        [yBrazo1, yBrazo2].forEach(yB => {
+            // Brazo Izquierdo
+            const bIzq = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            bIzq.setAttribute("x", xPosteIzq + encajuelado/2); bIzq.setAttribute("y", yB - hCuadrado/2);
+            bIzq.setAttribute("width", (xCentro - wCuadro/2) - (xPosteIzq + encajuelado/2)); bIzq.setAttribute("height", hCuadrado);
+            bIzq.setAttribute("fill", "#d32f2f"); lienzo.appendChild(bIzq);
+            
+            // Brazo Derecho
+            const bDer = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            bDer.setAttribute("x", xCentro + wCuadro/2); bDer.setAttribute("y", yB - hCuadrado/2);
+            bDer.setAttribute("width", (xPosteDer - encajuelado/2) - (xCentro + wCuadro/2)); bDer.setAttribute("height", hCuadrado);
+            bDer.setAttribute("fill", "#d32f2f"); lienzo.appendChild(bDer);
+            
+            cantBrazosCortos += 2;
+        });
+    }
+    
+    // CALCULOS DE MATERIALES PARA LA TABLA
+    const cortePlatinaH = ancho;
+    const cortePlatinaV = alto;
+    
+    const marcoEncajueladoV = alto - (platina * 2);
+    const marcoEncajueladoH = ancho - (platina * 2);
+    const postesInternosV = hUtil;
+    const travesañoZocaloH = wPuerta - (encajuelado * 2);
+    
+    const largoUnicoBrazo = (xCentro - wCuadro/2) - (xPosteIzq + encajuelado/2);
+    totalCmsCuadrado += (largoUnicoBrazo * cantBrazosCortos);
+    
+    // Render de Tabla
+    const body = document.querySelector('#tablaCortes tbody');
+    body.innerHTML = `
+        <tr class="subtitulo-tabla"><td colspan="4">PASO 1: MARCO PERIMETRAL EXTERIOR</td></tr>
+        <tr><td>Platina 1"</td><td>Superior / Inferior</td><td><b>${cortePlatinaH.toFixed(1)} cm</b></td><td><strong>2</strong></td></tr>
+        <tr><td>Platina 1"</td><td>Laterales Izq / Der</td><td><b>${cortePlatinaV.toFixed(1)} cm</b></td><td><strong>2</strong></td></tr>
+        
+        <tr class="subtitulo-tabla"><td colspan="4">PASO 2: BASTIDOR Y MARCO (ÁNGULO ENCAJUELADO)</td></tr>
+        <tr><td>Ángulo (Para Tubo)</td><td>Postes Marco Vertical</td><td><b>${marcoEncajueladoV.toFixed(1)} cm</b></td><td><strong>4</strong> <small>(2 pares)</small></td></tr>
+        <tr><td>Ángulo (Para Tubo)</td><td>Cabezales Marco Horiz.</td><td><b>${marcoEncajueladoH.toFixed(1)} cm</b></td><td><strong>4</strong> <small>(2 pares)</small></td></tr>
+        <tr><td>Ángulo (Para Tubo)</td><td>Divisor Sobre Zócalo</td><td><b>${travesañoZocaloH.toFixed(1)} cm</b></td><td><strong>2</strong> <small>(1 par)</small></td></tr>
+        
+        <tr class="subtitulo-tabla"><td colspan="4">PASO 3: RETÍCULA DE FONDO (ÁNGULO ENCAJUELADO)</td></tr>
+        <tr><td>Ángulo (Para Tubo)</td><td>Poste Central y Pasadores</td><td><b>${postesInternosV.toFixed(1)} cm</b></td><td><strong>6</strong> <small>(3 pares)</small></td></tr>
+        
+        <tr class="subtitulo-tabla"><td colspan="4">PASO 4: DECORACIÓN CENTRAL</td></tr>
+        <tr><td>Hierro Cuadrado 1/2"</td><td>Tramos para 3 Cuadros</td><td><b>${wCuadro.toFixed(1)} cm</b></td><td><strong>12</strong></td></tr>
+        <tr><td>Hierro Cuadrado 1/2"</td><td>Brazos de Enlace Horiz.</td><td><b>${largoUnicoBrazo.toFixed(1)} cm</b></td><td><strong>${cantBrazosCortos}</strong></td></tr>
+        
+        <tr class="subtitulo-tabla"><td colspan="4">PASO 5: COMPLEMENTOS</td></tr>
+        <tr><td>Lámina Ciega</td><td>Zócalo Inferior</td><td><b>${(wPuerta-(encajuelado*2)).toFixed(1)} x ${(zocalo-encajuelado).toFixed(1)} cm</b></td><td><strong>1</strong></td></tr>
+    `;
+    
+    // Estimación de barras totales (Sumando 7% de desperdicio)
+    const totalCmsPlatina = (cortePlatinaH * 2) + (cortePlatinaV * 2);
+    const totalCmsAngulo = ((marcoEncajueladoV * 4) + (marcoEncajueladoH * 4) + (travesañoZocaloH * 2) + (postesInternosV * 6));
+    
+    document.getElementById('detalleCompra').innerHTML = `
+        <div><b>Platina 1":</b> ${Math.ceil((totalCmsPlatina*1.07)/600)} barra(s) <small>(${totalCmsPlatina.toFixed(0)} cm)</small></div>
+        <div><b>Ángulo Metálico:</b> ${Math.ceil((totalCmsAngulo*1.07)/600)} barra(s) de 6m <small>(${totalCmsAngulo.toFixed(0)} cm para encajuelar)</small></div>
+        <div><b>Hierro Cuadrado 1/2":</b> ${Math.ceil((totalCmsCuadrado*1.07)/600)} barra(s) <small>(${totalCmsCuadrado.toFixed(0)} cm)</small></div>
+    `;
+}
+
+calcularPuerta();
+</script>
+</body>
+</html>
