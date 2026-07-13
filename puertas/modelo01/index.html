@@ -75,7 +75,7 @@
 
 <div class="col-controles">
     <h2 style="margin-top:0; color:#111;">Puertas - Modelo 01</h2>
-    <p style="font-size:12px; color:#666; margin-top:-10px;">Parrilla Completa de 1/2" + 2 Horizontales</p>
+    <p style="font-size:12px; color:#666; margin-top:-10px;">Parrilla de 1/2" + Holgura Ajustable</p>
     <button class="btn-pdf" onclick="window.print()">🖨️ Imprimir Guía de Cortes</button>
     
     <div class="control-group">
@@ -87,6 +87,10 @@
         <input type="number" id="alto" value="210" oninput="calcularPuerta()">
     </div>
     <div class="control-group">
+        <label>Holgura / Luz del Marco (cm):</label>
+        <input type="number" id="holgura" value="5" oninput="calcularPuerta()">
+    </div>
+    <div class="control-group">
         <label>Alto Zócalo / Lámina Base (cm):</label>
         <input type="number" id="zocalo" value="40" oninput="calcularPuerta()">
     </div>
@@ -96,7 +100,7 @@
     </div>
     <div class="control-group">
         <label>Separación entre Varillas (cm):</label>
-        <input type="number" id="sepVarillas" value="9" oninput="calcularPuerta()">
+        <input type="number" id="sepVarillas" value="7" oninput="calcularPuerta()">
     </div>
 </div>
 
@@ -122,76 +126,75 @@
 function calcularPuerta() {
     const ancho = parseFloat(document.getElementById('ancho').value) || 95;
     const alto = parseFloat(document.getElementById('alto').value) || 210;
+    const holgura = parseFloat(document.getElementById('holgura').value) || 5;
     const zocalo = parseFloat(document.getElementById('zocalo').value) || 40;
     const wCuadro = parseFloat(document.getElementById('anchoCuadro').value) || 25;
     const hCuadro = wCuadro;
-    const sepVarillas = parseFloat(document.getElementById('sepVarillas').value) || 9;
+    const sepVarillas = parseFloat(document.getElementById('sepVarillas').value) || 7;
     
     const platina = 2.54;       // Ceja exterior de 1"
-    const encajuelado = 3.81;   // Bastidor de ángulo encajuelado (Caja azul)
+    const encajuelado = 3.81;   // Bastidor de ángulo encajuelado
     const hCuadrado = 1.27;     // Hierro cuadrado de 1/2"
     
     const lienzo = document.getElementById('lienzo');
     lienzo.setAttribute('viewBox', `0 0 ${ancho} ${alto}`);
     lienzo.innerHTML = '';
     
-    // 1. Platina Exterior (Gris perimetral)
+    // 1. Platina Exterior Fija (Gris)
     const rPlatina = document.createElementNS("http://www.w3.org/2000/svg", "rect");
     rPlatina.setAttribute("x", platina/2); rPlatina.setAttribute("y", platina/2);
     rPlatina.setAttribute("width", ancho - platina); rPlatina.setAttribute("height", alto - platina);
     rPlatina.setAttribute("fill", "none"); rPlatina.setAttribute("stroke", "#78909c"); rPlatina.setAttribute("stroke-width", platina);
     lienzo.appendChild(rPlatina);
     
-    const xPuertaMin = platina;
-    const wPuertaInterna = ancho - (platina * 2);
+    // Cálculo de la posición del bastidor considerando la holgura ajustable
+    const xBastidorMin = platina + holgura;
+    const wBastidor = ancho - (platina * 2) - (holgura * 2);
     const yZocaloTop = alto - platina - zocalo;
+    const hBastidor = (yZocaloTop - xBastidorMin);
     
     // 2. Zócalo Inferior de Lámina
     const rZocalo = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    rZocalo.setAttribute("x", xPuertaMin); rZocalo.setAttribute("y", yZocaloTop);
-    rZocalo.setAttribute("width", wPuertaInterna); rZocalo.setAttribute("height", zocalo);
+    rZocalo.setAttribute("x", xBastidorMin); rZocalo.setAttribute("y", yZocaloTop);
+    rZocalo.setAttribute("width", wBastidor); rZocalo.setAttribute("height", zocalo);
     rZocalo.setAttribute("fill", "#37474f"); rZocalo.setAttribute("opacity", "0.85");
     lienzo.appendChild(rZocalo);
     
-    // 3. Bastidor de Ángulo Encajuelado (Marco azul de tu dibujo)
+    // 3. BASTIDOR DE ÁNGULO ENCAJUELADO (El marco azul con espacio libre regulable)
     const rBastidor = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    rBastidor.setAttribute("x", xPuertaMin + encajuelado/2); rBastidor.setAttribute("y", xPuertaMin + encajuelado/2);
-    rBastidor.setAttribute("width", wPuertaInterna - encajuelado); rBastidor.setAttribute("height", (yZocaloTop - xPuertaMin) - encajuelado/2);
+    rBastidor.setAttribute("x", xBastidorMin + encajuelado/2); rBastidor.setAttribute("y", xBastidorMin + encajuelado/2);
+    rBastidor.setAttribute("width", wBastidor - encajuelado); rBastidor.setAttribute("height", hBastidor - encajuelado/2);
     rBastidor.setAttribute("fill", "none"); rBastidor.setAttribute("stroke", "#002fa7"); rBastidor.setAttribute("stroke-width", encajuelado);
     lienzo.appendChild(rBastidor);
 
-    // Límites internos del bastidor azul para la parrilla
-    const xIntMin = xPuertaMin + encajuelado;
-    const xIntMax = xPuertaMin + wPuertaInterna - encajuelado;
+    // Límites internos del bastidor azul para anclar la parrilla
+    const xIntMin = xBastidorMin + encajuelado;
+    const xIntMax = xBastidorMin + wBastidor - encajuelado;
     const wIntParrilla = xIntMax - xIntMin;
-    const yIntMin = xPuertaMin + encajuelado;
+    const yIntMin = xBastidorMin + encajuelado;
     const yIntMax = yZocaloTop - encajuelado;
     const hIntParrilla = yIntMax - yIntMin;
     const xCentroPuerta = ancho / 2;
     
     let totalCmsCuadrado = 0;
     
-    // 4. Parrilla de Hierro Cuadrado 1/2" (Eje central + 4 varillas por lado)
+    // 4. Parrilla de Refuerzo Vertical (1 central + 4 por lado)
     let xVarillas = [];
-    // 4 Varillas izquierdas
     for(let i=1; i<=4; i++) xVarillas.push(xIntMin + (i * sepVarillas));
-    // Eje Central (Varilla negra en tu esquema, hecha de media)
     xVarillas.push(xCentroPuerta);
-    // 4 Varillas derechas en espejo
     for(let i=1; i<=4; i++) xVarillas.push(xIntMax - (i * sepVarillas));
     
-    // Dibujar Varillas Verticales de media (Rojas en tu plano)
     xVarillas.forEach(xV => {
         const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
         line.setAttribute("x1", xV); line.setAttribute("y1", yIntMin);
         line.setAttribute("x2", xV); line.setAttribute("y2", yIntMax);
         line.setAttribute("stroke", xV === xCentroPuerta ? "#1a1a1a" : "#d32f2f"); 
-        line.setAttribute("stroke-width", xV === xCentroPuerta ? hCuadrado * 1.2 : hCuadrado);
+        line.setAttribute("stroke-width", xV === xCentroPuerta ? hCuadrado * 1.3 : hCuadrado);
         lienzo.appendChild(line);
     });
     totalCmsCuadrado += (hIntParrilla * xVarillas.length);
     
-    // 5. Dos Varillas Horizontales Largas (Las líneas rojas transversales de tu dibujo)
+    // 5. Dos Varillas Horizontales Largas
     const tercioAlto = hIntParrilla / 3;
     const yHorizontal1 = yIntMin + tercioAlto;
     const yHorizontal2 = yIntMin + (tercioAlto * 2);
@@ -205,16 +208,17 @@ function calcularPuerta() {
     });
     totalCmsCuadrado += (wIntParrilla * 2);
     
-    // Identificar las varillas más cercanas al cuadro (las cuartas contando desde el exterior)
+    // Varillas más cercanas al cuadro (las cuartas desde afuera)
     const xVarillaAmarreIzq = xVarillas[3];
     const xVarillaAmarreDer = xVarillas[5];
+    const largoBrazoAmarre = (xCentroPuerta - wCuadro/2) - xVarillaAmarreIzq;
     
-    // 6. Los 3 Cuadros Centrales y sus pequeños bracitos de acople
+    // 6. Los 3 Cuadros Centrales y sus 2 únicos amarres horizontales por módulo
     for (let i = 0; i < 3; i++) {
         const yCentroMódulo = yIntMin + (tercioAlto * i) + (tercioAlto / 2);
         const yTopCuadro = yCentroMódulo - (hCuadro / 2);
         
-        // El cuadro de 1/2"
+        // Dibujar cuadro central
         const rCuadro = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         rCuadro.setAttribute("x", xCentroPuerta - (wCuadro / 2)); rCuadro.setAttribute("y", yTopCuadro);
         rCuadro.setAttribute("width", wCuadro); rCuadro.setAttribute("height", hCuadro);
@@ -222,58 +226,50 @@ function calcularPuerta() {
         lienzo.appendChild(rCuadro);
         totalCmsCuadrado += (wCuadro * 4);
         
-        // Bracitos de amarre cortos (Los rectángulos rojos pequeños de tu dibujo)
-        const yBrazo1 = yTopCuadro + (hCuadro * 0.25);
-        const yBrazo2 = yTopCuadro + (hCuadro * 0.75);
-        const largoBrazoCorto = (xCentroPuerta - wCuadro/2) - xVarillaAmarreIzq;
+        // Un único par de brazos alineados al centro exacto del cuadro (Líneas horizontales)
+        const yBrazoEje = yCentroMódulo;
         
-        [yBrazo1, yBrazo2].forEach(yB => {
-            // Amarre Izquierdo
-            const b1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            b1.setAttribute("x1", xVarillaAmarreIzq); b1.setAttribute("y1", yB);
-            b1.setAttribute("x2", xCentroPuerta - wCuadro/2); b1.setAttribute("y2", yB);
-            b1.setAttribute("stroke", "#ff9800"); b1.setAttribute("stroke-width", hCuadrado * 1.5); // Resaltado en naranja
-            lienzo.appendChild(b1);
-            
-            // Amarre Derecho
-            const b2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            b2.setAttribute("x1", xCentroPuerta + wCuadro/2); b2.setAttribute("y1", yB);
-            b2.setAttribute("x2", xVarillaAmarreDer); b2.setAttribute("y2", yB);
-            b2.setAttribute("stroke", "#ff9800"); b2.setAttribute("stroke-width", hCuadrado * 1.5);
-            lienzo.appendChild(b2);
-            
-            totalCmsCuadrado += (largoBrazoCorto * 2);
-        });
+        // Amarre Izquierdo
+        const b1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        b1.setAttribute("x1", xVarillaAmarreIzq); b1.setAttribute("y1", yBrazoEje);
+        b1.setAttribute("x2", xCentroPuerta - wCuadro/2); b1.setAttribute("y2", yBrazoEje);
+        b1.setAttribute("stroke", "#ff9800"); b1.setAttribute("stroke-width", hCuadrado * 1.5);
+        lienzo.appendChild(b1);
+        
+        // Amarre Derecho
+        const b2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        b2.setAttribute("x1", xCentroPuerta + wCuadro/2); b2.setAttribute("y1", yBrazoEje);
+        b2.setAttribute("x2", xVarillaAmarreDer); b2.setAttribute("y2", yBrazoEje);
+        b2.setAttribute("stroke", "#ff9800"); b2.setAttribute("stroke-width", hCuadrado * 1.5);
+        lienzo.appendChild(b2);
+        
+        totalCmsCuadrado += (largoBrazoAmarre * 2);
     }
     
-    // COMPUTO DE LISTA DE MATERIALES PARA EL TALLER
+    // CÓMPUTO DE DESPIECE ESTRUCTURAL
     const totalCmsPlatina = (ancho * 2) + (alto * 2);
-    const bastidorVert = yZocaloTop - xPuertaMin;
-    const bastidorHoriz = wPuertaInterna;
-    const totalCmsAngulo = (bastidorVert * 4) + (bastidorHoriz * 4); // Solo el marco perimetral azul se encajuela
-    
-    const largoBrazoAmarre = (xCentroPuerta - wCuadro/2) - xVarillaAmarreIzq;
+    const totalCmsAngulo = (hBastidor * 4) + (wBastidor * 4); 
     
     const body = document.querySelector('#tablaCortes tbody');
     body.innerHTML = `
-        <tr class="subtitulo-tabla"><td colspan="4">PASO 1: MARCO EXTERIOR DE CEJA</td></tr>
+        <tr class="subtitulo-tabla"><td colspan="4">PASO 1: MARCO PERIMETRAL EXTERIOR</td></tr>
         <tr><td>Platina 1"</td><td>Superior / Inferior</td><td><b>${ancho.toFixed(1)} cm</b></td><td><strong>2</strong></td></tr>
         <tr><td>Platina 1"</td><td>Laterales Izq / Der</td><td><b>${alto.toFixed(1)} cm</b></td><td><strong>2</strong></td></tr>
         
-        <tr class="subtitulo-tabla"><td colspan="4">PASO 2: BASTIDOR DE PUERTA (ÁNGULO ENCAJUELADO)</td></tr>
-        <tr><td>Ángulo (Para Tubo)</td><td>Postes Bastidor Vertical</td><td><b>${bastidorVert.toFixed(1)} cm</b></td><td><strong>4</strong> <small>(2 pares)</small></td></tr>
-        <tr><td>Ángulo (Para Tubo)</td><td>Cabezales Bastidor Horiz.</td><td><b>${bastidorHoriz.toFixed(1)} cm</b></td><td><strong>4</strong> <small>(2 pares)</small></td></tr>
+        <tr class="subtitulo-tabla"><td colspan="4">PASO 2: HOJA DE PUERTA (ÁNGULO ENCAJUELADO)</td></tr>
+        <tr><td>Ángulo (Para Tubo)</td><td>Postes Verticales Hoja</td><td><b>${hBastidor.toFixed(1)} cm</b></td><td><strong>4</strong> <small>(2 pares)</small></td></tr>
+        <tr><td>Ángulo (Para Tubo)</td><td>Cabezales Horizontales Hoja</td><td><b>${wBastidor.toFixed(1)} cm</b></td><td><strong>4</strong> <small>(2 pares)</small></td></tr>
         
         <tr class="subtitulo-tabla"><td colspan="4">PASO 3: PARRILLA DE REFUERZO (HIERRO CUADRADO 1/2")</td></tr>
         <tr><td>Hierro Cuadrado 1/2"</td><td>Varillas Verticales Largas</td><td><b>${hIntParrilla.toFixed(1)} cm</b></td><td><strong>9</strong> <small>(4 Izq + 1 Centro + 4 Der)</small></td></tr>
-        <tr><td>Hierro Cuadrado 1/2"</td><td>Varillas Horizontales De Lado a Lado</td><td><b>${wIntParrilla.toFixed(1)} cm</b></td><td><strong>2</strong></td></tr>
+        <tr><td>Hierro Cuadrado 1/2"</td><td>Varillas Horizontales Completas</td><td><b>${wIntParrilla.toFixed(1)} cm</b></td><td><strong>2</strong></td></tr>
         
-        <tr class="subtitulo-tabla"><td colspan="4">PASO 4: EMBLEMAS Y AMARRES (HIERRO CUADRADO 1/2")</td></tr>
+        <tr class="subtitulo-tabla"><td colspan="4">PASO 4: EMBLEMAS Y DOS REFUERZOS (HIERRO CUADRADO 1/2")</td></tr>
         <tr><td>Hierro Cuadrado 1/2"</td><td>Tramos para 3 Cuadros</td><td><b>${wCuadro.toFixed(1)} cm</b></td><td><strong>12</strong></td></tr>
-        <tr><td>Hierro Cuadrado 1/2"</td><td>Brazos Cortos de Amarre</td><td><b>${largoBrazoAmarre.toFixed(1)} cm</b></td><td><strong>12</strong></td></tr>
+        <tr><td>Hierro Cuadrado 1/2"</td><td>Brazos de Amarre del Eje</td><td><b>${largoBrazoAmarre.toFixed(1)} cm</b></td><td><strong>6</strong> <small>(3 Izq + 3 Der)</small></td></tr>
         
         <tr class="subtitulo-tabla"><td colspan="4">PASO 5: CUBIERTA BASE</td></tr>
-        <tr><td>Lámina Ciega</td><td>Zócalo de Privacidad</td><td><b>${wPuertaInterna.toFixed(1)} x ${zocalo.toFixed(1)} cm</b></td><td><strong>1</strong></td></tr>
+        <tr><td>Lámina Ciega</td><td>Zócalo de Privacidad</td><td><b>${wBastidor.toFixed(1)} x ${zocalo.toFixed(1)} cm</b></td><td><strong>1</strong></td></tr>
     `;
     
     document.getElementById('detalleCompra').innerHTML = `
