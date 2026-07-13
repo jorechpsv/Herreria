@@ -2,49 +2,123 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculador de Cortes Estilo LEGO - Herrería</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; display: flex; padding: 20px; background: #f0f2f5; margin: 0; height: 100vh; box-sizing: border-box; }
-        .col-controles { width: 320px; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-right: 20px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; }
-        .col-visor { flex-grow: 1; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-right: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; box-sizing: border-box; }
-        .col-reporte { width: 460px; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); display: flex; flex-direction: column; height: 100%; box-sizing: border-box; }
-        .panel-inputs { overflow-y: auto; flex-grow: 1; padding-right: 5px; }
-        .panel-tabla { overflow-y: auto; flex-grow: 1; margin-top: 10px; }
+        /* Estructura Base Responsiva */
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            display: flex; 
+            padding: 20px; 
+            background: #f0f2f5; 
+            margin: 0; 
+            min-height: 100vh; 
+            box-sizing: border-box; 
+        }
+        
+        /* Columnas en Escritorio */
+        .col-controles { 
+            width: 320px; 
+            min-width: 320px;
+            padding: 20px; 
+            background: white; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            margin-right: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            box-sizing: border-box; 
+        }
+        .col-visor { 
+            flex-grow: 1; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            margin-right: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            box-sizing: border-box; 
+        }
+        .col-reporte { 
+            width: 440px; 
+            min-width: 440px;
+            padding: 20px; 
+            background: white; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            display: flex; 
+            flex-direction: column; 
+            box-sizing: border-box; 
+        }
+
+        /* Paneles con scroll interno solo en PC */
+        .panel-inputs { flex-grow: 1; }
+        .panel-tabla { flex-grow: 1; margin-top: 10px; }
+
+        /* Elementos UI comunes */
         .control-group { margin-bottom: 12px; }
         label { display: block; font-weight: bold; margin-bottom: 4px; color: #444; font-size: 13px; }
         input, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; background: white; }
-        .balance-panel { background: #e8f5e9; padding: 12px; border-left: 4px solid #2e7d32; border-radius: 4px; font-size: 12.5px; margin-bottom: 15px; color: #1b5e20; }
+        .balance-panel { background: #e8f5e9; padding: 12px; border-left: 4px solid #2e7d32; border-radius: 4px; font-size: 12.5px; margin-bottom: 15px; color: #1b5e20; font-weight: bold; text-align: center; }
         .btn-limpiar { width: 100%; padding: 10px; background: #d32f2f; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; margin-bottom: 10px; }
         .btn-limpiar:hover { background: #c62828; }
         .btn-pdf { width: 100%; padding: 12px; background: #1e88e5; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-pdf:hover { background: #1565c0; }
+        
         .compra-box { padding: 12px; background: #e3f2fd; border-left: 4px solid #1e88e5; border-radius: 4px; color: #0d47a1; font-size: 13.5px; margin-bottom: 15px; }
         .compra-box h4 { margin: 0 0 8px 0; font-size: 15px; color: #0d47a1; border-bottom: 1px solid #bbdefb; padding-bottom: 4px; }
-        svg { border: 1px solid #ccc; background: #fff; max-height: 80vh; max-width: 100%; border-radius: 4px; }
+        
+        svg { border: 1px solid #ccc; background: #fff; max-height: 75vh; max-width: 100%; border-radius: 4px; box-sizing: border-box; }
         .tubo-interno { cursor: pointer; transition: opacity 0.2s; }
         .tubo-interno:hover { opacity: 0.7; stroke: #ff9800 !important; stroke-width: 0.8px; }
+        
         table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-bottom: 15px; }
         th, td { border: 1px solid #e0e0e0; padding: 7px; text-align: left; }
-        th { background-color: #343a40; color: white; position: sticky; top: 0; }
+        th { background-color: #343a40; color: white; }
         .subtitulo-tabla { background-color: #f1f3f5; font-weight: bold; color: #495057; font-size: 11.5px; }
+
+        /* 📱 REGLAS CRÍTICAS PARA CELULARES (Pantallas menores a 900px) */
+        @media (max-width: 900px) {
+            body { 
+                flex-direction: column; 
+                padding: 10px;
+            }
+            .col-controles, .col-visor, .col-reporte { 
+                width: 100% !important; 
+                min-width: 100% !important; 
+                margin-right: 0 !important; 
+                margin-bottom: 15px; 
+                height: auto !important;
+            }
+            svg { 
+                max-height: 60vh; 
+                width: 100%; 
+            }
+        }
+
+        /* 🖨️ Reglas de Impresión */
         @media print {
             body { display: block; background: white; padding: 0; height: auto; }
             .col-controles, .btn-limpiar, .btn-pdf, .balance-panel { display: none !important; }
             .col-visor { page-break-after: always; box-shadow: none; padding: 0; margin: 0; width: 100%; height: 95vh; justify-content: center; }
             svg { max-height: 85vh; width: 85%; border: none; }
             .col-reporte { box-shadow: none; padding: 0; margin: 0; width: 100%; height: auto; display: block; }
-            .panel-tabla { overflow: visible; }
-            th { position: static; background-color: #343a40 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            th { background-color: #343a40 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .compra-box { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #e3f2fd !important; border-left: 4px solid #1e88e5 !important; }
         }
     </style>
 </head>
 <body>
+
 <div class="col-controles">
-    <h2>Estructurador LEGO</h2>
+    <h2 style="margin-top:0; color:#111;">Estructurador LEGO</h2>
     <div id="panelBalance" class="balance-panel">Calculando...</div>
     <button class="btn-limpiar" onclick="limpiarLienzo()">🧹 Limpiar Todo</button>
     <button class="btn-pdf" onclick="window.print()">🖨️ Imprimir Ficha (PDF)</button>
+    
     <div class="panel-inputs">
         <div class="control-group">
             <label>Asistente de Simetría (Espejo):</label>
@@ -83,24 +157,33 @@
         </div>
     </div>
 </div>
-<div class="col-visor"><svg id="lienzo" viewBox="0 0 146 341"></svg></div>
+
+<div class="col-visor">
+    <svg id="lienzo" viewBox="0 0 146 341"></svg>
+</div>
+
 <div class="col-reporte">
     <div class="compra-box" id="reporteCompra">
-        <h4>📋 Resumen de Compra (Barras 6m + 7% Desperdicio)</h4>
+        <h4>📋 Resumen de Compra (Barras 6m + 7% Desper.)</h4>
         <div id="detalleCompra">Sin piezas.</div>
     </div>
-    <h3>🛠️ Guía de Cortes Lego para el Obrero</h3>
+    <h3 style="margin-top:0;">🛠️ Guía de Cortes Lego</h3>
     <div class="panel-tabla">
         <table id="tablaCortes">
-            <thead><tr><th>ID / Bloque</th><th>Material</th><th>Medida</th><th>Cant</th></tr></thead>
+            <thead>
+                <tr><th>ID / Bloque</th><th>Material</th><th>Medida</th><th>Cant</th></tr>
+            </thead>
             <tbody></tbody>
         </table>
     </div>
 </div>
+
 <script>
 let piezasSeleccionadas = {};
 let largoUnicoH = 0, largoUnicoV = 0, numEspaciosX = 0, numEspaciosY = 0;
+
 function limpiarLienzo() { piezasSeleccionadas = {}; inicializarCuadracula(); }
+
 function inicializarCuadracula() {
     const anchoTotal = parseFloat(document.getElementById('ancho').value) || 100;
     const altoTotal = parseFloat(document.getElementById('alto').value) || 100;
@@ -108,22 +191,30 @@ function inicializarCuadracula() {
     const marcoCaraExt = parseFloat(document.getElementById('materialMarco').value); 
     const tuboCaraExt  = parseFloat(document.getElementById('materialInterno').value); 
     const lienzo = document.getElementById('lienzo');
+    
     lienzo.setAttribute('viewBox', `0 0 ${anchoTotal} ${altoTotal}`);
     lienzo.innerHTML = ''; 
+    
     const xMin = marcoCaraExt, xMax = anchoTotal - marcoCaraExt, yMin = marcoCaraExt, yMax = altoTotal - marcoCaraExt;
+    
     numEspaciosX = Math.round((xMax - xMin + tuboCaraExt) / (X_deseada + tuboCaraExt)) || 1;
     largoUnicoH = (xMax - xMin - ((numEspaciosX - 1) * tuboCaraExt)) / numEspaciosX;
+    
     numEspaciosY = Math.round((yMax - yMin + tuboCaraExt) / (X_deseada + tuboCaraExt)) || 1;
     largoUnicoV = (yMax - yMin - ((numEspaciosY - 1) * tuboCaraExt)) / numEspaciosY;
+    
     document.getElementById('panelBalance').innerHTML = `Celdas: X=${numEspaciosX}, Y=${numEspaciosY}`;
+    
     const marco = document.createElementNS("http://www.w3.org/2000/svg", "rect");
     marco.setAttribute("x", marcoCaraExt/2); marco.setAttribute("y", marcoCaraExt/2);
     marco.setAttribute("width", anchoTotal - marcoCaraExt); marco.setAttribute("height", altoTotal - marcoCaraExt);
     marco.setAttribute("fill", "none"); marco.setAttribute("stroke", "#002fa7"); marco.setAttribute("stroke-width", marcoCaraExt);
     lienzo.appendChild(marco);
+    
     let xPosiciones = [], yPosiciones = [];
     for(let i=1; i<numEspaciosX; i++) xPosiciones.push(xMin + (i*largoUnicoH) + ((i-1)*tuboCaraExt));
     for(let j=1; j<numEspaciosY; j++) yPosiciones.push(yMin + (j*largoUnicoV) + ((j-1)*tuboCaraExt));
+    
     let xPuntos = [xMin, ...xPosiciones, xMax];
     for (let f=0; f<yPosiciones.length; f++) {
         let yPos = yPosiciones[f];
@@ -133,6 +224,7 @@ function inicializarCuadracula() {
             dibujarSegmentoTubo(id, (c===0?xPuntos[c]:xPuntos[c]+tuboCaraExt), yPos, largoUnicoH, tuboCaraExt, 'H', f, c);
         }
     }
+    
     let yPuntos = [yMin, ...yPosiciones, yMax];
     for (let c=0; c<xPosiciones.length; c++) {
         let xPos = xPosiciones[c];
@@ -144,6 +236,7 @@ function inicializarCuadracula() {
     }
     actualizarFichaCortes();
 }
+
 function dibujarSegmentoTubo(id, x, y, w, h, tipo, f, c) {
     const lienzo = document.getElementById('lienzo');
     const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -152,6 +245,7 @@ function dibujarSegmentoTubo(id, x, y, w, h, tipo, f, c) {
     const activo = piezasSeleccionadas[id];
     rect.setAttribute("fill", activo ? "#2b2b2b" : "rgba(224, 224, 224, 0.15)");
     rect.setAttribute("stroke", activo ? "#ffffff" : "#e0e0e0"); rect.setAttribute("stroke-width", "0.2");
+    
     rect.onclick = function() {
         const modo = document.getElementById('modoEspejo').value;
         piezasSeleccionadas[id] = !piezasSeleccionadas[id];
@@ -165,6 +259,7 @@ function dibujarSegmentoTubo(id, x, y, w, h, tipo, f, c) {
     };
     lienzo.appendChild(rect);
 }
+
 function actualizarFichaCortes() {
     const anchoTotal = parseFloat(document.getElementById('ancho').value) || 0;
     const altoTotal = parseFloat(document.getElementById('alto').value) || 0;
@@ -172,7 +267,9 @@ function actualizarFichaCortes() {
     const tuboCaraExt  = parseFloat(document.getElementById('materialInterno').value);
     const nombreMarco = document.getElementById('materialMarco').options[document.getElementById('materialMarco').selectedIndex].text.split(" (")[0];
     const nombreInterno = document.getElementById('materialInterno').options[document.getElementById('materialInterno').selectedIndex].text.split(" (")[0];
+    
     let tramosH = [], tramosV = [], sumaCmsInterno = 0, legoCounter = 1;
+    
     for (let f=0; f<numEspaciosY-1; f++) {
         let enRacha = false, celdas = 0, cInicio = 0;
         for (let c=0; c<numEspaciosX; c++) {
@@ -193,6 +290,7 @@ function actualizarFichaCortes() {
             sumaCmsInterno += l; legoCounter++;
         }
     }
+    
     for (let c=0; c<numEspaciosX-1; c++) {
         let enRacha = false, celdas = 0, fInicio = 0;
         for (let f=0; f<numEspaciosY; f++) {
@@ -213,17 +311,20 @@ function actualizarFichaCortes() {
             sumaCmsInterno += l; legoCounter++;
         }
     }
+    
     tramosH.forEach(t => {
         dibujarTextoLego(marcoCaraExt + (t.colStart*(largoUnicoH+tuboCaraExt)) + (t.longitud/2), marcoCaraExt + (t.fila+1)*(largoUnicoV+tuboCaraExt) - (tuboCaraExt/2) + 1.5, t.idLego);
     });
     tramosV.forEach(t => {
         dibujarTextoLego(marcoCaraExt + (t.col+1)*(largoUnicoH+tuboCaraExt) - (tuboCaraExt/2), marcoCaraExt + (t.filaStart*(largoUnicoV+tuboCaraExt)) + (t.longitud/2) + 2, t.idLego);
     });
+    
     const tablaBody = document.querySelector('#tablaCortes tbody');
     tablaBody.innerHTML = '<tr class="subtitulo-tabla"><td colspan="4">PASO 1: MARCO EXTERIOR ESTRUCTURAL</td></tr>';
     const largoMarcoV = altoTotal - (marcoCaraExt * 2);
     tablaBody.innerHTML += `<tr><td><b>M-H</b></td><td>${nombreMarco}</td><td><mark><b>${anchoTotal.toFixed(1)} cm</b></mark></td><td><strong>2</strong></td></tr>`;
     tablaBody.innerHTML += `<tr><td><b>M-V</b></td><td>${nombreMarco}</td><td><mark><b>${largoMarcoV.toFixed(1)} cm</b></mark></td><td><strong>2</strong></td></tr>`;
+    
     if (tramosH.length > 0) {
         tablaBody.innerHTML += '<tr class="subtitulo-tabla"><td colspan="4">PASO 2: PIEZAS HORIZONTALES INTERNAS</td></tr>';
         tramosH.forEach(t => { tablaBody.innerHTML += `<tr><td><span class="badge-lego">#${t.idLego}</span></td><td>${nombreInterno}</td><td><mark><b>${t.longitud.toFixed(1)} cm</b></mark></td><td><strong>1</strong></td></tr>`; });
@@ -232,22 +333,26 @@ function actualizarFichaCortes() {
         tablaBody.innerHTML += '<tr class="subtitulo-tabla"><td colspan="4">PASO 3: PIEZAS VERTICALES DE ACOPLE</td></tr>';
         tramosV.forEach(t => { tablaBody.innerHTML += `<tr><td><span class="badge-lego">#${t.idLego}</span></td><td>${nombreInterno}</td><td><mark><b>${t.longitud.toFixed(1)} cm</b></mark></td><td><strong>1</strong></td></tr>`; });
     }
+    
     let totalCmsMarco = (anchoTotal * 2) + (largoMarcoV * 2);
     document.getElementById('detalleCompra').innerHTML = `
         <div><b>${nombreMarco}:</b> ${Math.ceil((totalCmsMarco*1.07)/600)} barra(s) <small>(${totalCmsMarco.toFixed(0)} cm)</small></div>
         <div><b>${nombreInterno}:</b> ${Math.ceil((sumaCmsInterno*1.07)/600)} barra(s) <small>(${sumaCmsInterno.toFixed(0)} cm)</small></div>`;
 }
+
 function dibujarTextoLego(x, y, num) {
     const lienzo = document.getElementById('lienzo');
     const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     circle.setAttribute("cx", x); circle.setAttribute("cy", y - 1.5); circle.setAttribute("r", "3.2");
     circle.setAttribute("fill", "#ffffff"); circle.setAttribute("stroke", "#1a1a1a"); circle.setAttribute("stroke-width", "0.4");
     lienzo.appendChild(circle);
+    
     const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
     txt.setAttribute("x", x); txt.setAttribute("y", y); txt.setAttribute("font-size", "4.5");
     txt.setAttribute("font-weight", "bold"); txt.setAttribute("fill", "#1a1a1a"); txt.setAttribute("text-anchor", "middle");
     txt.textContent = num; lienzo.appendChild(txt);
 }
+
 inicializarCuadracula();
 </script>
 </body>
