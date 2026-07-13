@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SDHerreria - Control de Producción</title>
+    <title>SDHerreria - Panel de Control</title>
     <style>
         body {
             margin: 0; padding: 0;
@@ -15,7 +15,7 @@
             box-sizing: border-box; padding: 20px;
         }
         .container {
-            padding: 30px; max-width: 500px; width: 100%;
+            padding: 25px; max-width: 600px; width: 100%;
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 24px; text-align: center;
@@ -23,21 +23,49 @@
             backdrop-filter: blur(10px);
         }
         h1 { font-size: 32px; font-weight: 800; margin: 0; color: #fff; }
-        .signature { font-size: 13px; color: #6366f1; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; display: block; }
+        .signature { font-size: 13px; color: #6366f1; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; display: block; }
         
-        .seccion-cat { text-align: left; margin-bottom: 25px; }
-        .cat-titulo { font-size: 14px; color: #8a8f98; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;}
-        
-        .btn-link {
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255, 255, 255, 0.05); color: #fff;
-            text-decoration: none; padding: 14px 18px; border-radius: 12px;
-            font-weight: 600; font-size: 15px; margin-bottom: 10px;
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: background 0.2s, transform 0.2s;
+        /* Selector de Categorías (Pestañas) */
+        .tabs-container {
+            display: flex; gap: 10px; margin-bottom: 25px;
+            background: rgba(0, 0, 0, 0.2); padding: 6px; border-radius: 14px;
         }
-        .btn-link:hover { background: rgba(255, 255, 255, 0.12); transform: translateY(-2px); }
-        .badge { font-size: 11px; background: #6366f1; padding: 4px 8px; border-radius: 6px; font-weight: bold; }
+        .tab-btn {
+            flex: 1; padding: 12px; border: none; border-radius: 10px;
+            background: transparent; color: #8a8f98; font-weight: 700;
+            font-size: 15px; cursor: pointer; transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: #ffffff; color: #111215;
+            box-shadow: 0 4px 12px rgba(255,255,255,0.1);
+        }
+
+        /* Rejilla de Modelos (Grid) */
+        .grid-modelos {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1xl));
+            gap: 15px; text-align: left;
+        }
+        
+        /* Tarjeta de Modelo */
+        .card-modelo {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px; padding: 16px;
+            text-decoration: none; color: #e2e8f0;
+            display: flex; flex-direction: column; justify-content: space-between;
+            min-height: 110px; transition: all 0.2s;
+        }
+        .card-modelo:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #6366f1; transform: translateY(-3px);
+        }
+        .card-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; color: #fff; }
+        .card-desc { font-size: 12px; color: #8a8f98; line-height: 1.3; }
+        .card-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+        .badge { font-size: 10px; background: rgba(99, 102, 241, 0.2); color: #a5b4fc; padding: 3px 8px; border-radius: 6px; font-weight: bold; border: 1px solid rgba(99, 102, 241, 0.3); }
+
+        /* Clases para Filtrado */
+        .hidden { display: none !important; }
         
         .footer-text { margin-top: 30px; font-size: 11px; color: #555861; }
     </style>
@@ -48,20 +76,44 @@
         <h1>SDHerreria</h1>
         <span class="signature">by jorechpsv</span>
 
-        <div class="seccion-cat">
-            <div class="cat-titulo">🚪 Catálogo de Puertas</div>
-            <a href="./puertas/modelo01/index.html" class="btn-link">
-                <span>Puerta Cuadros Geométricos</span>
-                <span class="badge">Modelo 01</span>
-            </a>
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="filtrar('todos', this)">Ver Todo</button>
+            <button class="tab-btn" onclick="filtrar('puerta', this)">🚪 Puertas</button>
+            <button class="tab-btn" onclick="filtrar('ventana', this)">🪟 Ventanas</button>
         </div>
 
-        <div class="seccion-cat">
-            <div class="cat-titulo">🪟 Catálogo de Ventanas / Balcones</div>
-            <a href="./ventanas/modelo01/index.html" class="btn-link">
-                <span>Balcón Laberinto Concéntrico</span>
-                <span class="badge">Modelo 01</span>
+        <div class="grid-modelos">
+            
+            <a href="./puertas/modelo01/index.html" class="card-modelo" data-tipo="puerta">
+                <div>
+                    <div class="card-title">Cuadros Geométricos</div>
+                    <div class="card-desc">Ángulo encajuelado y hierro cuadrado de 1/2".</div>
+                </div>
+                <div class="card-meta">
+                    <span class="badge">Modelo 01</span>
+                </div>
             </a>
+
+            <a href="#" class="card-modelo" data-tipo="puerta" style="opacity: 0.7;" onclick="alert('Armando el módulo de colochos...'); event.preventDefault();">
+                <div>
+                    <div class="card-title">Flor de Sol</div>
+                    <div class="card-desc">Diseño colonial con colochos y estrella central.</div>
+                </div>
+                <div class="card-meta">
+                    <span class="badge" style="color: #ff9800; border-color: rgba(255,152,0,0.3); background: rgba(255,152,0,0.1);">Modelo 02</span>
+                </div>
+            </a>
+
+            <a href="./ventanas/modelo01/index.html" class="card-modelo" data-tipo="ventana">
+                <div>
+                    <div class="card-title">Balcón Laberinto</div>
+                    <div class="card-desc">Estructura interactiva estilo bloques LEGO.</div>
+                </div>
+                <div class="card-meta">
+                    <span class="badge">Modelo 01</span>
+                </div>
+            </a>
+
         </div>
 
         <div class="footer-text">
@@ -69,5 +121,21 @@
         </div>
     </div>
 
+    <script>
+        function filtrar(tipo, subBoton) {
+            // Cambiar estado activo del botón
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            subBoton.classList.add('active');
+            
+            // Filtrar las tarjetas en la rejilla
+            document.querySelectorAll('.card-modelo').forEach(card => {
+                if (tipo === 'todos' || card.getAttribute('data-tipo') === tipo) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+    </script>
 </body>
 </html>
